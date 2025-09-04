@@ -1,0 +1,313 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template to create infrastructure for spurs.gov'
+Parameters:
+  KeyName:
+    Description: 'Name of an existing EC2 KeyPair to enable SSH access to the instance'
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  InstanceType:
+    Description: 'EC2 instance type'
+    Type: 'String'
+    Default: 't2.micro'
+    AllowedValues:
+      - 't2.micro'
+      - 't2.small'
+      - 't2.medium'
+  VpcCidrBlock:
+    Description: 'CIDR block for the VPC'
+    Type: 'String'
+    Default: '10.0.0.0/16'
+  SubnetCidrBlock:
+    Description: 'CIDR block for the public subnet'
+    Type: 'String'
+    Default: '10.0.1.0/24'
+  SshCidrIp:
+    Description: 'CIDR block for SSH access to the EC2 instance'
+    Type: 'String'
+    Default: '0.0.0.0/0'
+
+Mappings:
+  AmiRegionMap:
+    'us-east-1':
+      'AMI': 'ami-0c55b159cbfafe1f0' # Amazon Linux 2 AMI
+    'us-east-2':
+      'AMI': 'ami-0fb653ca2d3203ac1' # Amazon Linux 2 AMI
+    'us-west-1':
+      'AMI': 'ami-0d70546e43a942d77' # Amazon Linux 2 AMI
+    'us-west-2':
+      'AMI': 'ami-0e472ba40eb589f49' # Amazon Linux 2 AMI
+
+Resources:
+  InstanceIamRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'ec2.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: 'SecretsManagerReadAccess'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'secretsmanager:GetSecretValue'
+                Resource: '*'
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: '/'
+      Roles:
+        - !Ref InstanceIamRole
+  SpursGovVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VpcCidrBlock
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: 'Name'
+          Value: 'SpursGovVPC'
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'SpursGovIGW'
+  AttachGateway:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref SpursGovVPC
+      InternetGatewayId: !Ref InternetGateway
+  PublicSubnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref SpursGovVPC
+      CidrBlock: !Ref SubnetCidrBlock
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'Name'
+          Value: 'PublicSubnet'
+  RouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref SpursGovVPC
+      Tags:
+        - Key: 'Name'
+          Value: 'PublicRouteTable'
+  Route:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGateway
+  SubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref RouteTable
+  SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref SpursGovVPC
+      GroupDescription: 'Allow SSH and HTTP(S) traffic'
+      SecurityGroupIngress:
+        - IpProtocol: 'tcp'
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: !Ref SshCidrIp
+        - IpProtocol: 'tcp'
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: '0.0.0.0/0'
+        - IpProtocol: 'tcp'
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: '0.0.0.0/0'
+      Tags:
+        - Key: 'Name'
+          Value: 'SpursGovSecurityGroup'
+  Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      SubnetId: !Ref PublicSubnet
+      ImageId: !FindInMap [AmiRegionMap, !Ref 'AWS::Region', 'AMI']
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref InstanceProfile
+      Tags:
+        - Key: 'Name'
+          Value: 'SpursGovInstance'
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            set -e
+
+            # Refactored script for setting up the spurs.gov environment
+
+            # --- Configuration ---
+            DOMAIN="spurs.gov"
+            ADMIN_EMAIL="admin@${DOMAIN}"
+            CLOUDFLARE_API_TOKEN_SECRET_NAME="CloudflareApiToken"
+            GOOGLE_VERIFICATION_CODE_SECRET_NAME="GoogleVerificationCode"
+            REGION="us-east-1" # Or get from instance metadata
+
+            # --- Helper Functions ---
+            log() {
+                echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"
+            }
+
+            get_secret() {
+                aws secretsmanager get-secret-value --secret-id "$1" --region "$REGION" --query SecretString --output text
+            }
+
+            # --- Main Script ---
+
+            log "Starting setup for ${DOMAIN}"
+
+            # --- Install necessary packages ---
+            log "Updating and installing packages..."
+            yum update -y
+            yum install -y httpd bind bind-utils mod_ssl certbot python3-certbot-apache postfix mailx dovecot
+
+            # --- Configure Hostname ---
+            log "Configuring hostname..."
+            hostnamectl set-hostname "server.${DOMAIN}"
+
+            # --- Configure Apache ---
+            log "Configuring Apache..."
+            cat <<EOF > /etc/httpd/conf.d/vhost.conf
+            <VirtualHost *:80>
+                ServerName ${DOMAIN}
+                ServerAlias www.${DOMAIN}
+                DocumentRoot /var/www/html
+                # Redirect to HTTPS
+                RewriteEngine On
+                RewriteCond %{HTTPS} off
+                RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+            </VirtualHost>
+            EOF
+
+            # Add security headers
+            cat <<EOF > /etc/httpd/conf.d/security.conf
+            Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+            Header always set X-Frame-Options "SAMEORIGIN"
+            Header always set X-Content-Type-Options "nosniff"
+            Header always set X-XSS-Protection "1; mode=block"
+            Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+            EOF
+
+            systemctl enable httpd
+            systemctl start httpd
+
+            # --- Obtain SSL Certificate ---
+            log "Obtaining SSL certificate with Certbot..."
+            certbot --apache -d "${DOMAIN}" -d "www.${DOMAIN}" --non-interactive --agree-tos --email "${ADMIN_EMAIL}"
+
+            # --- Configure BIND ---
+            log "Configuring BIND..."
+            SERVER_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+
+            cat <<EOF > /etc/named.conf.local
+            zone "${DOMAIN}" {
+                type master;
+                file "/etc/named/zones/${DOMAIN}.zone";
+            };
+            EOF
+
+            mkdir -p /etc/named/zones
+
+            cat <<EOF > /etc/named/zones/${DOMAIN}.zone
+            \$TTL 86400
+            @   IN  SOA ns1.${DOMAIN}. admin.${DOMAIN}. (
+                    $(date +%Y%m%d%S) ; Serial
+                    3600        ; Refresh
+                    1800        ; Retry
+                    604800      ; Expire
+                    86400       ; Negative Cache TTL
+            )
+            @       IN  NS  ns1.${DOMAIN}.
+            ns1     IN  A   ${SERVER_IP}
+            www     IN  CNAME   @
+            @       IN  A   ${SERVER_IP}
+            EOF
+
+            systemctl enable named
+            systemctl start named
+
+            # --- Configure Postfix ---
+            log "Configuring Postfix..."
+            postconf -e "myhostname = mail.${DOMAIN}"
+            postconf -e "mydomain = ${DOMAIN}"
+            postconf -e "myorigin = ${DOMAIN}"
+            postconf -e "inet_interfaces = all"
+            postconf -e "inet_protocols = all"
+            postconf -e "mydestination = \$myhostname, localhost.\$mydomain, localhost, \$mydomain"
+
+            systemctl enable postfix
+            systemctl start postfix
+
+            # --- Configure Cloudflare ---
+            log "Configuring Cloudflare..."
+            CLOUDFLARE_API_TOKEN=$(get_secret "${CLOUDFLARE_API_TOKEN_SECRET_NAME}")
+            GOOGLE_VERIFICATION_CODE=$(get_secret "${GOOGLE_VERIFICATION_CODE_SECRET_NAME}")
+
+            pip3 install cloudflare
+
+            cat <<EOF > /root/cloudflare_setup.py
+            import CloudFlare
+            import os
+
+            cf = CloudFlare.CloudFlare(token=os.environ['CLOUDFLARE_API_TOKEN'])
+            domain_name = os.environ['DOMAIN']
+            server_ip = os.environ['SERVER_IP']
+            google_verification = os.environ['GOOGLE_VERIFICATION_CODE']
+
+            try:
+                zone_info = cf.zones.post(data={'name': domain_name, 'jump_start': False})
+                zone_id = zone_info['id']
+
+                dns_records = [
+                    {'type': 'A', 'name': '@', 'content': server_ip},
+                    {'type': 'A', 'name': 'www', 'content': server_ip},
+                    {'type': 'A', 'name': 'ns1', 'content': server_ip},
+                    {'type': 'MX', 'name': '@', 'content': 'aspmx.l.google.com.', 'priority': 1},
+                    {'type': 'MX', 'name': '@', 'content': 'alt1.aspmx.l.google.com.', 'priority': 5},
+                    {'type': 'MX', 'name': '@', 'content': 'alt2.aspmx.l.google.com.', 'priority': 5},
+                    {'type': 'MX', 'name': '@', 'content': 'alt3.aspmx.l.google.com.', 'priority': 10},
+                    {'type': 'MX', 'name': '@', 'content': 'alt4.aspmx.l.google.com.', 'priority': 10},
+                    {'type': 'TXT', 'name': '@', 'content': google_verification}
+                ]
+
+                for record in dns_records:
+                    cf.zones.dns_records.post(zone_id, data=record)
+
+                print(f"Successfully configured DNS for {domain_name}")
+
+            except CloudFlare.exceptions.CloudFlareAPIError as e:
+                print(f"Error: {e}")
+
+            EOF
+
+            export DOMAIN SERVER_IP CLOUDFLARE_API_TOKEN GOOGLE_VERIFICATION_CODE
+            python3 /root/cloudflare_setup.py
+
+            log "Setup script finished."
+
+Outputs:
+  InstanceId:
+    Description: 'Instance ID of the newly created instance'
+    Value: !Ref Instance
+  PublicIp:
+    Description: 'Public IP address of the EC2 instance'
+    Value: !GetAtt Instance.PublicIp
+  PublicDnsName:
+    Description: 'Public DNS name of the EC2 instance'
+    Value: !GetAtt Instance.PublicDnsName
