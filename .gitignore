@@ -1,0 +1,43 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Build and Dependency Directories
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary Files
+*.tmp
+*.temp
+*.log
+.cache/
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+
+# Test Coverage
+coverage/
+.nyc_output/
+
+# GitHub Pages
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# Backup Files
+*.bak
+*.backup

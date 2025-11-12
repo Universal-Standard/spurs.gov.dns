@@ -1,8 +1,40 @@
 # spurs.gov.dns
 
-This project contains a CloudFormation template and a setup script to deploy a secure and scalable web infrastructure on AWS for the `spurs.gov` domain.
+This repository provides **two deployment options** for hosting the `spurs.gov` website:
 
-## Features
+1. **GitHub Pages** (Recommended for static sites) - Modern, cost-effective, and easy to maintain
+2. **AWS Infrastructure** (Legacy) - Full control with EC2, CloudFormation, and traditional hosting
+
+## Quick Start - GitHub Pages
+
+The easiest way to get started is with GitHub Pages:
+
+1. Enable GitHub Pages in repository settings
+2. Configure custom domain (`spurs.gov`)
+3. Verify domain ownership
+4. Configure DNS records
+
+**[📚 Complete GitHub Pages Setup Guide](GITHUB_PAGES_SETUP.md)**
+
+## AWS Infrastructure (Legacy)
+
+This project also contains a CloudFormation template and a setup script to deploy a secure and scalable web infrastructure on AWS for the `spurs.gov` domain.
+
+## GitHub Pages Features
+
+The GitHub Pages deployment includes:
+
+- **U.S. Web Design System (USWDS)**: Professional, accessible design components
+- **WCAG 2.1 AA Compliance**: Full accessibility support with Section 508 compliance
+- **Automatic HTTPS**: Free SSL/TLS certificates via Let's Encrypt
+- **Domain Verification**: Protection against domain takeover attacks
+- **Automated CI/CD**: Deployment, accessibility testing, and link checking
+- **Security Best Practices**: CSP, security headers, and vulnerability scanning
+- **Digital Analytics Program**: Government-wide analytics integration
+- **Mobile Responsive**: Works seamlessly on all devices
+- **SEO Optimized**: Proper meta tags, sitemap, and semantic HTML
+
+## AWS Infrastructure Features (Legacy)
 
 - **Automated Infrastructure Deployment:** Uses CloudFormation to automate the creation of all necessary AWS resources, including a VPC, subnets, security groups, and an EC2 instance.
 - **Secure by Default:** The infrastructure is deployed with security best practices in mind, including:
@@ -11,18 +43,89 @@ This project contains a CloudFormation template and a setup script to deploy a s
     - Security headers in the Apache configuration to protect against common web vulnerabilities.
 - **Scalable and Flexible:** The CloudFormation template is designed to be scalable and flexible, with parameters that allow you to customize the deployment to your specific needs.
 
+## Repository Structure
+
+```
+spurs.gov.dns/
+├── index.html                    # Main website homepage
+├── CNAME                         # GitHub Pages custom domain
+├── 404.html                     # Custom 404 error page
+├── privacy.html                 # Privacy policy
+├── accessibility.html           # Accessibility statement
+├── robots.txt                   # Search engine directives
+├── sitemap.xml                  # Site structure
+├── assets/                      # Static assets (CSS, JS, images)
+├── .well-known/                 # Security and verification files
+│   └── security.txt
+├── .github/workflows/           # CI/CD automation
+│   ├── deploy.yml              # GitHub Pages deployment
+│   ├── accessibility.yml       # Accessibility testing
+│   └── link-checker.yml        # Link validation
+├── GITHUB_PAGES_SETUP.md       # GitHub Pages setup guide
+├── SECURITY.md                  # Security policy
+├── CODE_OF_CONDUCT.md          # Community guidelines
+├── CONTRIBUTING.md             # Contribution guidelines
+├── cloudformation.yaml         # AWS deployment (legacy)
+└── setup.sh                    # AWS setup script (legacy)
+```
+
 ## Prerequisites
 
-Before you can deploy the infrastructure, you need to have the following:
+### For GitHub Pages Deployment
 
-- An AWS account.
-- The AWS CLI installed and configured.
-- A domain name registered with a domain registrar.
-- A Cloudflare account.
+- GitHub account with organization admin access
+- Control over `spurs.gov` DNS records
+- Basic understanding of Git and GitHub
 
-## Deployment
+### For AWS Deployment (Legacy)
 
-To deploy the infrastructure, follow these steps:
+- An AWS account
+- The AWS CLI installed and configured
+- A domain name registered with a domain registrar
+- A Cloudflare account
+
+## Deployment Options
+
+### Option 1: GitHub Pages (Recommended)
+
+**Step-by-step guide**: See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md)
+
+Quick overview:
+
+1. **Enable GitHub Pages**
+   - Go to Settings → Pages
+   - Set source to `main` branch
+   - Save
+
+2. **Verify Domain**
+   - Organization Settings → Verified domains
+   - Add `spurs.gov`
+   - Add TXT record to DNS
+   - Verify
+
+3. **Configure DNS**
+   ```
+   A     @    185.199.108.153
+   A     @    185.199.109.153
+   A     @    185.199.110.153
+   A     @    185.199.111.153
+   CNAME www  spurs.gov
+   ```
+
+4. **Enable HTTPS**
+   - Settings → Pages → Enforce HTTPS
+   - Wait for certificate (up to 24 hours)
+
+5. **Deploy**
+   - Push to main branch
+   - GitHub Actions automatically deploys
+   - Site live at https://spurs.gov
+
+**Total Cost**: $0/month (GitHub Pages is free for public repositories)
+
+### Option 2: AWS Infrastructure (Legacy)
+
+To deploy the AWS infrastructure, follow these steps:
 
 1. **Create secrets in AWS Secrets Manager:**
 
