@@ -165,9 +165,11 @@ TTL: 3600
 
 ### Additional DNS Records for .gov Sites
 
+> **Note**: See [DNS_MANAGEMENT.md](DNS_MANAGEMENT.md) for comprehensive DNS best practices following GSA-TTS patterns.
+
 #### DNSSEC (Recommended)
 
-Enable DNSSEC through your DNS provider for added security.
+Enable DNSSEC through your DNS provider for added security. DNSSEC is strongly recommended for all .gov domains by CISA.
 
 #### CAA Records (Recommended)
 
@@ -349,6 +351,8 @@ To update the website:
 - [U.S. Web Design System](https://designsystem.digital.gov/)
 - [Section 508](https://www.section508.gov/)
 - [Cloud.gov Pages](https://cloud.gov/pages/)
+- [GSA-TTS DNS Architecture](https://github.com/gsa-tts/dns) - Infrastructure as Code patterns
+- [CISA DNSSEC Guidance](https://www.cisa.gov/dnssec)
 
 ### Tools
 
@@ -357,6 +361,17 @@ To update the website:
 - [WAVE Accessibility Tool](https://wave.webaim.org/)
 - [DNS Checker](https://dnschecker.org/)
 
+## Alternative: Infrastructure as Code
+
+For organizations wanting Terraform-managed DNS (following GSA-TTS patterns):
+
+- See [terraform/README.md](terraform/README.md) for optional Terraform configuration
+- Example configuration: [terraform/examples/github-pages.tf](terraform/examples/github-pages.tf)
+- Provides Git-based change tracking and peer review for DNS changes
+- Trade-off: Adds ~$0.50/month cost for Route 53 hosted zone
+
+**Note**: This is optional. Direct DNS management (documented above) is simpler and free.
+
 ## Support
 
 For assistance:
@@ -364,6 +379,7 @@ For assistance:
 - **Technical Issues**: Create a GitHub Issue
 - **Security Concerns**: security@spurs.gov
 - **General Questions**: info@spurs.gov
+- **DNS Questions**: See [DNS_MANAGEMENT.md](DNS_MANAGEMENT.md)
 
 ---
 

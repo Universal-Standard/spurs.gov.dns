@@ -1,0 +1,277 @@
+name: DNS Health Check
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'CNAME'
+      - 'DNS_MANAGEMENT.md'
+      - '.github/workflows/dns-monitor.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dns-health-check:
+    name: DNS Configuration Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install DNS tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dnsutils curl
+      
+      - name: Verify A Records (GitHub Pages IPs)
+        id: a-records
+        run: |
+          echo "Checking A records for GitHub Pages..."
+          
+          EXPECTED_IPS=("185.199.108.153" "185.199.109.153" "185.199.110.153" "185.199.111.153")
+          ACTUAL_IPS=$(dig spurs.gov A +short | sort)
+          
+          echo "Expected IPs: ${EXPECTED_IPS[@]}"
+          echo "Actual IPs: $ACTUAL_IPS"
+          
+          # Check if all expected IPs are present
+          for ip in "${EXPECTED_IPS[@]}"; do
+            if ! echo "$ACTUAL_IPS" | grep -q "$ip"; then
+              echo "::error::Missing GitHub Pages IP: $ip"
+              exit 1
+            fi
+          done
+          
+          echo "✅ All GitHub Pages A records are correct"
+      
+      - name: Verify WWW CNAME
+        id: www-cname
+        run: |
+          echo "Checking WWW CNAME..."
+          
+          WWW_CNAME=$(dig www.spurs.gov CNAME +short)
+          
+          if [ -z "$WWW_CNAME" ]; then
+            echo "::warning::WWW CNAME not configured"
+          elif [[ "$WWW_CNAME" == "spurs.gov." ]] || [[ "$WWW_CNAME" == "spurs.gov" ]]; then
+            echo "✅ WWW CNAME points to spurs.gov"
+          else
+            echo "::error::WWW CNAME points to unexpected target: $WWW_CNAME"
+            exit 1
+          fi
+      
+      - name: Check CNAME file
+        id: cname-file
+        run: |
+          echo "Checking CNAME file contents..."
+          
+          if [ ! -f "CNAME" ]; then
+            echo "::error::CNAME file not found"
+            exit 1
+          fi
+          
+          CNAME_CONTENT=$(cat CNAME | tr -d '[:space:]')
+          
+          if [ "$CNAME_CONTENT" != "spurs.gov" ]; then
+            echo "::error::CNAME file contains unexpected content: $CNAME_CONTENT"
+            echo "Expected: spurs.gov"
+            exit 1
+          fi
+          
+          echo "✅ CNAME file is correct"
+      
+      - name: Verify HTTPS Certificate
+        id: https-check
+        run: |
+          echo "Checking HTTPS certificate..."
+          
+          # Check if site responds to HTTPS
+          if curl -Is https://spurs.gov | head -n 1 | grep -q "200\|301\|302"; then
+            echo "✅ HTTPS is accessible"
+          else
+            echo "::error::HTTPS not accessible or returning error"
+            exit 1
+          fi
+          
+          # Check SSL certificate validity
+          if openssl s_client -connect spurs.gov:443 -servername spurs.gov < /dev/null 2>/dev/null | openssl x509 -noout -checkend 604800; then
+            echo "✅ SSL certificate is valid for at least 7 more days"
+          else
+            echo "::warning::SSL certificate expires within 7 days"
+          fi
+      
+      - name: Check DNSSEC (if enabled)
+        id: dnssec
+        continue-on-error: true
+        run: |
+          echo "Checking DNSSEC status..."
+          
+          DNSSEC_STATUS=$(dig spurs.gov +dnssec +short | grep -c "RRSIG")
+          
+          if [ "$DNSSEC_STATUS" -gt 0 ]; then
+            echo "✅ DNSSEC is enabled"
+          else
+            echo "::warning::DNSSEC is not enabled (recommended for .gov domains)"
+          fi
+      
+      - name: Verify Domain Verification TXT Record
+        id: domain-verification
+        continue-on-error: true
+        run: |
+          echo "Checking for GitHub domain verification TXT record..."
+          
+          TXT_RECORDS=$(dig spurs.gov TXT +short)
+          
+          if echo "$TXT_RECORDS" | grep -q "github"; then
+            echo "✅ GitHub domain verification TXT record found"
+          else
+            echo "::warning::GitHub domain verification TXT record not found or not propagated yet"
+            echo "This is critical for preventing domain takeovers"
+          fi
+      
+      - name: Check CAA Records (Certificate Authority Authorization)
+        id: caa-records
+        continue-on-error: true
+        run: |
+          echo "Checking CAA records..."
+          
+          CAA_RECORDS=$(dig spurs.gov CAA +short)
+          
+          if [ -z "$CAA_RECORDS" ]; then
+            echo "::warning::No CAA records found (recommended for additional security)"
+          else
+            echo "✅ CAA records configured:"
+            echo "$CAA_RECORDS"
+          fi
+      
+      - name: Test Site Availability
+        id: site-check
+        run: |
+          echo "Testing site availability..."
+          
+          # Test main site
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://spurs.gov)
+          
+          if [ "$HTTP_CODE" == "200" ]; then
+            echo "✅ Site is accessible (HTTP $HTTP_CODE)"
+          else
+            echo "::error::Site returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          
+          # Test WWW redirect
+          WWW_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://www.spurs.gov)
+          
+          if [ "$WWW_CODE" == "200" ] || [ "$WWW_CODE" == "301" ] || [ "$WWW_CODE" == "302" ]; then
+            echo "✅ WWW subdomain is accessible (HTTP $WWW_CODE)"
+          else
+            echo "::warning::WWW subdomain returned HTTP $WWW_CODE"
+          fi
+      
+      - name: DNS Propagation Check
+        id: propagation
+        run: |
+          echo "Checking DNS propagation across multiple resolvers..."
+          
+          RESOLVERS=("8.8.8.8" "1.1.1.1" "208.67.222.222")
+          
+          for resolver in "${RESOLVERS[@]}"; do
+            echo "Checking resolver $resolver..."
+            RESULT=$(dig @$resolver spurs.gov A +short | head -n 1)
+            
+            if [ -n "$RESULT" ]; then
+              echo "  ✅ $resolver: $RESULT"
+            else
+              echo "  ::warning::No result from $resolver"
+            fi
+          done
+      
+      - name: Generate Health Report
+        if: always()
+        run: |
+          cat << 'EOF' > dns-health-report.md
+          # DNS Health Check Report
+          
+          **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **Domain**: spurs.gov
+          
+          ## Results
+          
+          - A Records: ${{ steps.a-records.outcome }}
+          - WWW CNAME: ${{ steps.www-cname.outcome }}
+          - CNAME File: ${{ steps.cname-file.outcome }}
+          - HTTPS Check: ${{ steps.https-check.outcome }}
+          - DNSSEC: ${{ steps.dnssec.outcome }}
+          - Domain Verification: ${{ steps.domain-verification.outcome }}
+          - CAA Records: ${{ steps.caa-records.outcome }}
+          - Site Availability: ${{ steps.site-check.outcome }}
+          - DNS Propagation: ${{ steps.propagation.outcome }}
+          
+          ## Recommendations
+          
+          - ⚠️ Enable DNSSEC for enhanced security (required for .gov domains)
+          - ⚠️ Add CAA records to restrict certificate issuance
+          - ✅ Ensure GitHub domain verification is complete
+          
+          ---
+          *Automated check via GitHub Actions*
+          EOF
+          
+          cat dns-health-report.md
+      
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 DNS Health Check Failed';
+            const body = `## DNS Health Check Failed
+            
+            The automated DNS health check has detected issues with spurs.gov DNS configuration.
+            
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            **Failed Checks**:
+            - A Records: ${{ steps.a-records.outcome }}
+            - WWW CNAME: ${{ steps.www-cname.outcome }}
+            - CNAME File: ${{ steps.cname-file.outcome }}
+            - HTTPS: ${{ steps.https-check.outcome }}
+            - Site Availability: ${{ steps.site-check.outcome }}
+            
+            Please review the workflow logs and take corrective action.
+            
+            ### Common Issues
+            
+            1. **DNS not propagated**: Wait up to 72 hours for full propagation
+            2. **Wrong IPs**: Ensure A records point to GitHub Pages IPs
+            3. **CNAME file incorrect**: Must contain only 'spurs.gov'
+            4. **HTTPS issues**: Check GitHub Pages settings
+            
+            See [DNS_MANAGEMENT.md](DNS_MANAGEMENT.md) for troubleshooting.
+            `;
+            
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['dns', 'infrastructure']
+            });
+            
+            const existingIssue = issues.data.find(issue => issue.title === title);
+            
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['dns', 'infrastructure', 'bug']
+              });
+            }

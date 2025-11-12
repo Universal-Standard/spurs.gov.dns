@@ -19,6 +19,8 @@ The easiest way to get started is with GitHub Pages:
 - **[⚡ Quick Start Guide](QUICKSTART.md)** - Get live in 30 minutes
 - **[📖 Complete Setup Guide](GITHUB_PAGES_SETUP.md)** - Detailed instructions
 - **[⚖️ Deployment Comparison](DEPLOYMENT_COMPARISON.md)** - GitHub Pages vs AWS
+- **[🌐 DNS Management](DNS_MANAGEMENT.md)** - DNS configuration & best practices (following GSA-TTS patterns)
+- **[🧪 Testing Guide](TESTING.md)** - Testing procedures
 - **[🔒 Security Policy](SECURITY.md)** - Security practices
 - **[🤝 Contributing](CONTRIBUTING.md)** - How to contribute
 
