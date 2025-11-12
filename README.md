@@ -14,7 +14,13 @@ The easiest way to get started is with GitHub Pages:
 3. Verify domain ownership
 4. Configure DNS records
 
-**[📚 Complete GitHub Pages Setup Guide](GITHUB_PAGES_SETUP.md)**
+### 📚 Documentation
+
+- **[⚡ Quick Start Guide](QUICKSTART.md)** - Get live in 30 minutes
+- **[📖 Complete Setup Guide](GITHUB_PAGES_SETUP.md)** - Detailed instructions
+- **[⚖️ Deployment Comparison](DEPLOYMENT_COMPARISON.md)** - GitHub Pages vs AWS
+- **[🔒 Security Policy](SECURITY.md)** - Security practices
+- **[🤝 Contributing](CONTRIBUTING.md)** - How to contribute
 
 ## AWS Infrastructure (Legacy)
 
