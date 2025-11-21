@@ -1,0 +1,101 @@
+/* Custom Styles for Spurs.gov */
+
+:root {
+    --primary-color: #005ea2;
+    --secondary-color: #1a4480;
+    --accent-color: #e52207;
+}
+
+body {
+    font-family: 'Source Sans Pro', 'Helvetica Neue', 'Helvetica', 'Roboto', 'Arial', sans-serif;
+}
+
+/* Hero Section Customization */
+.usa-hero {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                      url('data:image/svg+xml;charset=utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"%3E%3Crect fill="%23005ea2" width="1200" height="600"/%3E%3C/svg%3E');
+    background-size: cover;
+    background-position: center;
+}
+
+.usa-hero__callout {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    max-width: 30rem;
+}
+
+/* Accessibility Improvements */
+.usa-skipnav {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.usa-skipnav:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+/* Enhanced Focus Indicators */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .usa-banner,
+    .usa-header,
+    .usa-footer,
+    .usa-skipnav {
+        display: none;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+        background: #fff;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    body {
+        background-color: white;
+        color: black;
+    }
+    
+    a {
+        text-decoration: underline;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 640px) {
+    .usa-hero__callout {
+        max-width: 100%;
+    }
+}

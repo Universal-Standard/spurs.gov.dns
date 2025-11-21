@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Official website for Spurs.gov - Providing information and services">
+    <meta name="keywords" content="spurs, government, official, services">
+    <meta name="author" content="Spurs.gov">
+    
+    <!-- Security Headers via Meta Tags -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://spurs.gov/">
+    <meta property="og:title" content="Spurs.gov - Official Government Website">
+    <meta property="og:description" content="Official website for Spurs.gov - Providing information and services">
+    
+    <title>Spurs.gov - Official Government Website</title>
+    
+    <!-- US Web Design System (USWDS) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/css/uswds.min.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+</head>
+<body>
+    <!-- Skip Navigation -->
+    <a class="usa-skipnav" href="#main-content">Skip to main content</a>
+    
+    <!-- Government Banner -->
+    <section class="usa-banner" aria-label="Official website of the United States government">
+        <div class="usa-accordion">
+            <header class="usa-banner__header">
+                <div class="usa-banner__inner">
+                    <div class="grid-col-auto">
+                        <img aria-hidden="true" class="usa-banner__header-flag" src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/img/us_flag_small.png" alt="">
+                    </div>
+                    <div class="grid-col-fill tablet:grid-col-auto" aria-hidden="true">
+                        <p class="usa-banner__header-text">An official website of the United States government</p>
+                        <p class="usa-banner__header-action">Here's how you know</p>
+                    </div>
+                    <button type="button" class="usa-accordion__button usa-banner__button" aria-expanded="false" aria-controls="gov-banner-default">
+                        <span class="usa-banner__button-text">Here's how you know</span>
+                    </button>
+                </div>
+            </header>
+            <div class="usa-banner__content usa-accordion__content" id="gov-banner-default" hidden>
+                <div class="grid-row grid-gap-lg">
+                    <div class="usa-banner__guidance tablet:grid-col-6">
+                        <img class="usa-banner__icon usa-media-block__img" src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/img/icon-dot-gov.svg" role="img" alt="" aria-hidden="true">
+                        <div class="usa-media-block__body">
+                            <p><strong>Official websites use .gov</strong><br>A <strong>.gov</strong> website belongs to an official government organization in the United States.</p>
+                        </div>
+                    </div>
+                    <div class="usa-banner__guidance tablet:grid-col-6">
+                        <img class="usa-banner__icon usa-media-block__img" src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/img/icon-https.svg" role="img" alt="" aria-hidden="true">
+                        <div class="usa-media-block__body">
+                            <p><strong>Secure .gov websites use HTTPS</strong><br>A <strong>lock</strong> (<span class="icon-lock"><svg xmlns="http://www.w3.org/2000/svg" width="52" height="64" viewBox="0 0 52 64" class="usa-banner__lock-image" role="img" aria-labelledby="banner-lock-description"><title id="banner-lock-description">Lock</title><desc>Locked padlock icon</desc><path fill="#000000" fill-rule="evenodd" d="M26 0c10.493 0 19 8.507 19 19v9h3a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V32a4 4 0 0 1 4-4h3v-9C7 8.507 15.507 0 26 0zm0 8c-5.979 0-10.843 4.77-10.996 10.712L15 19v9h22v-9c0-6.075-4.925-11-11-11z"/></svg></span>) or <strong>https://</strong> means you've safely connected to the .gov website. Share sensitive information only on official, secure websites.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Header -->
+    <header class="usa-header usa-header--basic">
+        <div class="usa-nav-container">
+            <div class="usa-navbar">
+                <div class="usa-logo">
+                    <em class="usa-logo__text">
+                        <a href="/" title="Home" aria-label="Spurs.gov home">Spurs.gov</a>
+                    </em>
+                </div>
+                <button type="button" class="usa-menu-btn">Menu</button>
+            </div>
+            <nav aria-label="Primary navigation" class="usa-nav">
+                <button type="button" class="usa-nav__close">
+                    <img src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/img/usa-icons/close.svg" role="img" alt="Close">
+                </button>
+                <ul class="usa-nav__primary usa-accordion">
+                    <li class="usa-nav__primary-item">
+                        <a href="#about" class="usa-nav-link"><span>About</span></a>
+                    </li>
+                    <li class="usa-nav__primary-item">
+                        <a href="#services" class="usa-nav-link"><span>Services</span></a>
+                    </li>
+                    <li class="usa-nav__primary-item">
+                        <a href="#contact" class="usa-nav-link"><span>Contact</span></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section class="usa-hero" aria-label="Introduction">
+            <div class="grid-container">
+                <div class="usa-hero__callout">
+                    <h1 class="usa-hero__heading">
+                        <span class="usa-hero__heading--alt">Welcome to</span>
+                        Spurs.gov
+                    </h1>
+                    <p>Your official source for government information and services.</p>
+                    <a class="usa-button" href="#services">Explore Services</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="grid-container usa-section">
+            <div class="grid-row grid-gap">
+                <div class="tablet:grid-col-12">
+                    <h2 class="font-heading-xl margin-top-0 tablet:margin-bottom-0">About Spurs.gov</h2>
+                    <p class="usa-intro">
+                        Spurs.gov is committed to providing transparent, accessible, and efficient government services to all citizens.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="grid-row grid-gap">
+                <div class="tablet:grid-col-4">
+                    <h3 class="font-heading-lg">Our Mission</h3>
+                    <p>To serve the public with integrity, transparency, and dedication to excellence in all our operations.</p>
+                </div>
+                <div class="tablet:grid-col-4">
+                    <h3 class="font-heading-lg">Our Values</h3>
+                    <p>We uphold the highest standards of public service, accountability, and respect for all individuals.</p>
+                </div>
+                <div class="tablet:grid-col-4">
+                    <h3 class="font-heading-lg">Our Commitment</h3>
+                    <p>We are dedicated to continuous improvement and meeting the evolving needs of our community.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Services Section -->
+        <section id="services" class="usa-section usa-section--dark">
+            <div class="grid-container">
+                <h2 class="font-heading-xl margin-top-0">Our Services</h2>
+                <div class="usa-graphic-list__row grid-row grid-gap">
+                    <div class="usa-media-block tablet:grid-col">
+                        <div class="usa-media-block__body">
+                            <h3 class="usa-graphic-list__heading">Information Access</h3>
+                            <p>Access public records, documents, and information in accordance with transparency regulations.</p>
+                        </div>
+                    </div>
+                    <div class="usa-media-block tablet:grid-col">
+                        <div class="usa-media-block__body">
+                            <h3 class="usa-graphic-list__heading">Online Services</h3>
+                            <p>Complete forms, submit applications, and track requests through our secure online portal.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="usa-graphic-list__row grid-row grid-gap">
+                    <div class="usa-media-block tablet:grid-col">
+                        <div class="usa-media-block__body">
+                            <h3 class="usa-graphic-list__heading">Support Resources</h3>
+                            <p>Find answers to frequently asked questions and access helpful resources and guides.</p>
+                        </div>
+                    </div>
+                    <div class="usa-media-block tablet:grid-col">
+                        <div class="usa-media-block__body">
+                            <h3 class="usa-graphic-list__heading">Community Programs</h3>
+                            <p>Learn about initiatives and programs designed to support and engage our community.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="grid-container usa-section">
+            <div class="grid-row grid-gap">
+                <div class="tablet:grid-col-8">
+                    <h2 class="font-heading-xl margin-top-0">Contact Us</h2>
+                    <p class="usa-intro">
+                        We're here to help. Reach out to us with any questions or concerns.
+                    </p>
+                    <address class="usa-prose">
+                        <p>
+                            <strong>Spurs.gov</strong><br>
+                            Email: <a href="mailto:info@spurs.gov">info@spurs.gov</a><br>
+                            Phone: 1-800-SPURS-GOV (1-800-778-7746)
+                        </p>
+                    </address>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="usa-footer">
+        <div class="grid-container usa-footer__return-to-top">
+            <a href="#">Return to top</a>
+        </div>
+        <div class="usa-footer__primary-section">
+            <div class="grid-container">
+                <div class="grid-row grid-gap">
+                    <div class="tablet:grid-col-8">
+                        <nav class="usa-footer__nav" aria-label="Footer navigation">
+                            <ul class="grid-row grid-gap">
+                                <li class="mobile-lg:grid-col-6 desktop:grid-col-auto usa-footer__primary-content">
+                                    <a class="usa-footer__primary-link" href="/about.html">About</a>
+                                </li>
+                                <li class="mobile-lg:grid-col-6 desktop:grid-col-auto usa-footer__primary-content">
+                                    <a class="usa-footer__primary-link" href="/privacy.html">Privacy Policy</a>
+                                </li>
+                                <li class="mobile-lg:grid-col-6 desktop:grid-col-auto usa-footer__primary-content">
+                                    <a class="usa-footer__primary-link" href="/accessibility.html">Accessibility</a>
+                                </li>
+                                <li class="mobile-lg:grid-col-6 desktop:grid-col-auto usa-footer__primary-content">
+                                    <a class="usa-footer__primary-link" href="/foia.html">FOIA</a>
+                                </li>
+                                <li class="mobile-lg:grid-col-6 desktop:grid-col-auto usa-footer__primary-content">
+                                    <a class="usa-footer__primary-link" href="/.well-known/security.txt">Security</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="usa-footer__secondary-section">
+            <div class="grid-container">
+                <div class="grid-row grid-gap">
+                    <div class="usa-footer__logo grid-row mobile-lg:grid-col-6 mobile-lg:grid-gap-2">
+                        <div class="mobile-lg:grid-col-auto">
+                            <p class="usa-footer__logo-heading">Spurs.gov</p>
+                        </div>
+                    </div>
+                    <div class="usa-footer__contact-links mobile-lg:grid-col-6">
+                        <div class="usa-footer__social-links grid-row grid-gap-1">
+                            <div class="grid-col-auto">
+                                <a class="usa-social-link" href="https://github.com/Universal-Standard/spurs.gov.dns">
+                                    <img class="usa-social-link__icon" src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/img/usa-icons/github.svg" alt="GitHub">
+                                </a>
+                            </div>
+                        </div>
+                        <p class="usa-footer__contact-heading">Contact Information</p>
+                        <address class="usa-footer__address">
+                            <div class="usa-footer__contact-info grid-row grid-gap">
+                                <div class="grid-col-auto">
+                                    <a href="tel:1-800-778-7746">1-800-SPURS-GOV</a>
+                                </div>
+                            </div>
+                            <div class="usa-footer__contact-info grid-row grid-gap">
+                                <div class="grid-col-auto">
+                                    <a href="mailto:info@spurs.gov">info@spurs.gov</a>
+                                </div>
+                            </div>
+                        </address>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- US Web Design System JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@uswds/uswds@3.7.0/dist/js/uswds.min.js"></script>
+    
+    <!-- Digital Analytics Program (DAP) - Government Analytics -->
+    <script async type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=AGENCY" id="_fed_an_ua_tag"></script>
+</body>
+</html>
